@@ -16,7 +16,19 @@ exports.activate = activate;
 function initialize() {
   vscode.workspace.onDidChangeTextDocument(handleChangeTextDocument);
 
-  parseLcov(vscode.Uri.joinPath(rootUri(), "./coverage/lcov.info")).then(show);
+  let found = false;
+
+  vscode.workspace.findFiles("**/coverage/.resultset.json").then((uris) => {
+    parseJson(uris[0]);
+    found = true;
+  });
+
+  if (!found) {
+    vscode.workspace.findFiles("**/coverage/lcov.info").then((uris) => {
+      parseLcov(uris[0]);
+      found = true;
+    });
+  }
 }
 
 function handleChangeTextDocument(event) {
@@ -37,6 +49,20 @@ function show() {
 
 function hide() {
   statusBarItem.hide();
+}
+
+function parseJson(uri) {
+  return vscode.workspace.openTextDocument(uri).then((document) => {
+    const json = JSON.parse(document.getText());
+
+    for (const [key, value] of Object.entries(json.RSpec.coverage)) {
+      const meaningfulLines = value.lines.filter(line => line !== null).length;
+      const coveredLines = value.lines.filter(line => line > 0).length;
+      coverageData[key] = (coveredLines / meaningfulLines * 100).toFixed(0);
+    }
+
+    show();
+  });
 }
 
 function parseLcov(uri) {
