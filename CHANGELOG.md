@@ -2,8 +2,7 @@
 
 All notable changes to the "coverage-status" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
+## 0.1.0
 
 - Initial release
+- Displays code coverage from SimpleCov or Lcov formats

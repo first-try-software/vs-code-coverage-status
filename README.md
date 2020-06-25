@@ -1,65 +1,35 @@
-# coverage-status README
+# Coverage Status
 
-This is the README for your extension "coverage-status". After writing up a brief description, we recommend including the following sections.
-
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Coverage Status is a Visual Studio Code plug-in that displays code coverage from either SimpleCov or LCOV formats in the status bar.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+In order to make use of this extension you need to have code coverage data available. The extension supports SimpleCov for Ruby projects, and LCOV for all other types of projects. You may configure the location of your coverage files in Settings. The defaults are:
 
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
+```
+"coverage-status.searchPatterns": [
+  "coverage/.resultset.json",
+  "coverage/lcov*.info"
+]
+```
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+Please see our [CHANGELOG][cl].
 
-### 1.0.0
+## Contributing
 
-Initial release of ...
+Bug reports and pull requests are welcome on [GitHub][git].
 
-### 1.0.1
+## License
 
-Fixed issue #.
+The plugin is available as open source under the terms of the [MIT License][mit].
 
-### 1.1.0
+## Code of Conduct
 
-Added features X, Y, and Z.
+Everyone interacting in the project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct][cod].
 
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+[cl]: https://github.com/first-try-software/vs-code-coverage-status/blob/main/CHANGELOG.md
+[git]: https://github.com/first-try-software/vs-code-coverage-status
+[cod]: https://github.com/first-try-software/vs-code-coverage-status/blob/main/CODE_OF_CONDUCT.md
+[mit]: https://opensource.org/licenses/MIT

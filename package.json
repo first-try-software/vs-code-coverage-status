@@ -2,7 +2,7 @@
   "name": "coverage-status",
   "displayName": "Coverage Status",
   "description": "Code coverage in your status bar",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "first-try-software",
   "repository": {
     "type": "git",
@@ -12,6 +12,7 @@
   "engines": {
     "vscode": "^1.46.0"
   },
+  "keywords": ["code coverage", "coverage", "ruby", "simplecov", "lcov"],
   "categories": [
     "Other"
   ],
