@@ -2,13 +2,13 @@
   "name": "coverage-status",
   "displayName": "Coverage Status",
   "description": "Code coverage in your status bar",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "first-try-software",
   "repository": {
     "type": "git",
-    "url": "https://github.com/first-try-software/vs-code-ruby-flog.git"
+    "url": "https://github.com/first-try-software/vs-code-coverage-status.git"
   },
-  "homepage": "https://github.com/first-try-software/vs-code-ruby-flog/blob/main/README.md",
+  "homepage": "https://github.com/first-try-software/vs-code-coverage-status/blob/main/README.md",
   "engines": {
     "vscode": "^1.46.0"
   },
