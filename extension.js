@@ -23,18 +23,26 @@ exports.activate = activate;
 // Private functions
 
 function initialize() {
-  vscode.workspace.onDidChangeTextDocument(handleChangeTextDocument);
-
   coverageData = {};
 
-  // const defaultGlobs = ["**/coverage/.resultset.json", "**/coverage/lcov*.info"]
   const globs = vscode.workspace.getConfiguration("coverage-status").get("searchPatterns");
 
-  const watchers = globs.map(glob => vscode.workspace.createFileSystemWatcher(glob, false, true, true));
-  watchers.forEach(watcher => watcher.onDidCreate(handleChangeTextDocument));
+  initializePlugin(globs);
+  initializeWatchers(globs);
+}
 
+function initializePlugin(globs) {
   const promises = globs.map(glob => vscode.workspace.findFiles(glob));
   Promise.all(promises).then(parseUris);
+}
+
+function initializeWatchers(globs) {
+  const watchers = globs.map(glob => vscode.workspace.createFileSystemWatcher(glob, false, false, true));
+
+  watchers.forEach((watcher) => {
+    watcher.onDidCreate(initialize);
+    watcher.onDidChange(initialize);
+  });
 }
 
 function parseUris([firstResult]) {
@@ -45,16 +53,6 @@ function parseUris([firstResult]) {
     firstResult.forEach(parseJson);
   } else if (!!firstUri.fsPath.match(/lcov.*\.info/)) {
     firstResult.forEach(parseLcov);
-  }
-}
-
-function handleChangeTextDocument(event) {
-  const uri = event.document.uri;
-
-  if (uri.fsPath.match(".resultset.json")) {
-    parseJson(uri);
-  } else if (uri.fsPath.match(/lcov.*\.info/)) {
-    parseLcov(uri);
   }
 }
 

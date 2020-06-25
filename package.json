@@ -12,7 +12,13 @@
   "engines": {
     "vscode": "^1.46.0"
   },
-  "keywords": ["code coverage", "coverage", "ruby", "simplecov", "lcov"],
+  "keywords": [
+    "code coverage",
+    "coverage",
+    "ruby",
+    "simplecov",
+    "lcov"
+  ],
   "categories": [
     "Other"
   ],
