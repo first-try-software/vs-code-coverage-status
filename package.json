@@ -24,7 +24,26 @@
     "onStartupFinished"
   ],
   "main": "./extension.js",
-  "contributes": {},
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Coverage Status",
+      "properties": {
+        "coverage-status.searchPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "coverage/.resultset.json",
+            "coverage/lcov*.info"
+          ],
+          "description": "Coverage file search patterns",
+          "scope": "resource"
+        }
+      }
+    }
+  },
   "scripts": {
     "lint": "eslint .",
     "pretest": "yarn run lint",

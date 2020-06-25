@@ -3,9 +3,18 @@ const vscode = require("vscode");
 let statusBarItem;
 let coverageData = {};
 
+const coverageLevels = {
+  perfect: { icon: "$(verified)", tooltip: "First Try!" },
+  high: { icon: "", tooltip: "Almost there!" },
+  medium: { icon: "", tooltip: "You can do it!" },
+  low: { icon: "", tooltip: "Step it up!" },
+  none: { icon: "$(flame)", tooltip: "Really?!" }
+}
+
 function activate({ subscriptions }) {
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 900);
   subscriptions.push(vscode.window.onDidChangeActiveTextEditor(show));
+  subscriptions.push(vscode.workspace.onDidChangeConfiguration(initialize));
 
   initialize();
 }
@@ -16,39 +25,63 @@ exports.activate = activate;
 function initialize() {
   vscode.workspace.onDidChangeTextDocument(handleChangeTextDocument);
 
-  let found = false;
+  coverageData = {};
 
-  vscode.workspace.findFiles("**/coverage/.resultset.json").then((uris) => {
-    parseJson(uris[0]);
-    found = true;
-  });
+  // const defaultGlobs = ["**/coverage/.resultset.json", "**/coverage/lcov*.info"]
+  const globs = vscode.workspace.getConfiguration("coverage-status").get("searchPatterns");
 
-  if (!found) {
-    vscode.workspace.findFiles("**/coverage/lcov.info").then((uris) => {
-      parseLcov(uris[0]);
-      found = true;
-    });
+  const watchers = globs.map(glob => vscode.workspace.createFileSystemWatcher(glob, false, true, true));
+  watchers.forEach(watcher => watcher.onDidCreate(handleChangeTextDocument));
+
+  const promises = globs.map(glob => vscode.workspace.findFiles(glob));
+  Promise.all(promises).then(parseUris);
+}
+
+function parseUris([firstResult]) {
+  if (firstResult.length === 0) { return hide(); }
+
+  const firstUri = firstResult[0];
+  if (!!firstUri.fsPath.match(".resultset.json")) {
+    firstResult.forEach(parseJson);
+  } else if (!!firstUri.fsPath.match(/lcov.*\.info/)) {
+    firstResult.forEach(parseLcov);
   }
 }
 
 function handleChangeTextDocument(event) {
-  if (event.document.uri.fsPath.match("lcov.info")) {
-    parseLcov(event.document.uri);
+  const uri = event.document.uri;
+
+  if (uri.fsPath.match(".resultset.json")) {
+    parseJson(uri);
+  } else if (uri.fsPath.match(/lcov.*\.info/)) {
+    parseLcov(uri);
   }
 }
 
 function show() {
+  const activeDocument = getActiveDocument();
+  if (activeDocument === undefined) { return hide(); }
+
   const fileName = getActiveDocument().uri.fsPath;
-  const coverage = coverageData[fileName]
+  const coverage = coverageData[fileName];
   if (coverage === undefined) { return hide(); }
 
-  const icon = coverage > 99 ? "$(verified)" : "$(warning)";
-  statusBarItem.text = `${icon} ${coverage}%`;
+  const coverageLevel = getCoverageLevel(coverage);
+  statusBarItem.text = `${coverageLevels[coverageLevel].icon} ${coverage}%`;
+  statusBarItem.tooltip = coverageLevels[coverageLevel].tooltip;
   statusBarItem.show();
 }
 
 function hide() {
   statusBarItem.hide();
+}
+
+function getCoverageLevel(coverage) {
+  if (coverage > 99) return "perfect";
+  if (coverage > 79) return "high";
+  if (coverage > 49) return "medium";
+  if (coverage >  0) return "low";
+  return "none";
 }
 
 function parseJson(uri) {
@@ -88,6 +121,7 @@ function parseLcov(uri) {
         coverageData[currentFileFullPath] = (coveredLines / totalLines * 100).toFixed(0);
       }
     }
+
     show();
   });
 }
