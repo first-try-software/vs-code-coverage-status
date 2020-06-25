@@ -2,6 +2,14 @@
 
 All notable changes to the "coverage-status" extension will be documented in this file.
 
+## 0.1.2
+
+- Fixes issue of trying to watch too many files in large workspaces
+
+## 0.1.1
+
+- Fixes links to source control and homepage
+
 ## 0.1.0
 
 - Initial release
