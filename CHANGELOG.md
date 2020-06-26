@@ -2,9 +2,14 @@
 
 All notable changes to the "coverage-status" extension will be documented in this file.
 
+## 0.1.4
+
+- Adds support for older versions of SimpleCov
+- Resolves issue with change handlers
+
 ## 0.1.3
 
-  - Restructures event handling to resolve an issue that prevented the plugin from rendering any output
+- Restructures event handling to resolve an issue that prevented the plugin from rendering any output
 
 ## 0.1.2
 

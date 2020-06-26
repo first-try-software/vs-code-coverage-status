@@ -8,7 +8,7 @@ const coverageLevels = {
   high: { icon: "", tooltip: "Almost there!" },
   medium: { icon: "", tooltip: "You can do it!" },
   low: { icon: "", tooltip: "Step it up!" },
-  none: { icon: "$(flame)", tooltip: "Really?!" }
+  none: { icon: "$(warning)", tooltip: "Really?!" }
 }
 
 function activate({ subscriptions }) {
@@ -23,11 +23,9 @@ exports.activate = activate;
 // Private functions
 
 function initialize() {
-  console.log(">>>>> initialize <<<<<");
   coverageData = {};
 
   const globs = vscode.workspace.getConfiguration("coverage-status").get("searchPatterns");
-  globs.map((glob) => console.log(`glob: ${glob}`));
 
   initializePlugin(globs);
   initializeWatchers(globs);
@@ -42,28 +40,25 @@ function initializeWatchers(globs) {
   const watchers = globs.map(glob => vscode.workspace.createFileSystemWatcher(glob, false, false, true));
 
   watchers.forEach((watcher) => {
-    watcher.onDidCreate(initialize);
-    watcher.onDidChange(initialize);
+    watcher.onDidCreate(delay(initialize));
+    watcher.onDidChange(delay(initialize));
   });
 }
 
-function parseResults(results) {
-  console.log(">>>>> parseResults <<<<<");
-  if (results.length === 0) { return; }
+function delay(handler) {
+  return (uri) => setTimeout(() => handler(uri), 500);
+}
 
-  results.forEach(parseResult);
+function parseResults(results) {
+  const firstResult = results.find(result => !!result);
+  if (firstResult === undefined) { return; }
+
+  parseResult(firstResult);
 }
 
 function parseResult(result) {
-  console.log(">>>>> parseResult <<<<<")
-  console.log(result);
-
   const firstUri = result[0];
-  console.log(firstUri);
-
   if (firstUri === undefined) { return; }
-  console.log(!!firstUri.fsPath.match(".resultset.json"));
-  console.log(!!firstUri.fsPath.match(/lcov.*\.info/));
 
   if (!!firstUri.fsPath.match(".resultset.json")) {
     result.forEach(parseJson);
@@ -81,8 +76,8 @@ function show() {
   if (coverage === undefined) { return hide(); }
 
   const coverageLevel = getCoverageLevel(coverage);
-  statusBarItem.text = `${coverageLevels[coverageLevel].icon} ${coverage}%`;
-  statusBarItem.tooltip = coverageLevels[coverageLevel].tooltip;
+  statusBarItem.text = `Coverage: ${coverage}% ${coverageLevels[coverageLevel].icon}`;
+  statusBarItem.tooltip = `Coverage: ${coverage}% - ${coverageLevels[coverageLevel].tooltip}`;
   statusBarItem.show();
 }
 
@@ -103,11 +98,12 @@ function parseJson(uri) {
     const json = JSON.parse(document.getText());
 
     for (const [key, value] of Object.entries(json.RSpec.coverage)) {
-      const meaningfulLines = value.lines.filter(line => line !== null).length;
-      const coveredLines = value.lines.filter(line => line > 0).length;
+      const lines = value.lines === undefined ? value : value.lines;
+      const meaningfulLines = lines.filter(line => line !== null).length;
+      const coveredLines = lines.filter(line => line > 0).length;
       coverageData[key] = (coveredLines / meaningfulLines * 100).toFixed(0);
     }
-
+    console.log(coverageData);
     show();
   });
 }
