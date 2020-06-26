@@ -23,9 +23,11 @@ exports.activate = activate;
 // Private functions
 
 function initialize() {
+  console.log(">>>>> initialize <<<<<");
   coverageData = {};
 
   const globs = vscode.workspace.getConfiguration("coverage-status").get("searchPatterns");
+  globs.map((glob) => console.log(`glob: ${glob}`));
 
   initializePlugin(globs);
   initializeWatchers(globs);
@@ -33,7 +35,7 @@ function initialize() {
 
 function initializePlugin(globs) {
   const promises = globs.map(glob => vscode.workspace.findFiles(glob));
-  Promise.all(promises).then(parseUris);
+  Promise.all(promises).then(parseResults);
 }
 
 function initializeWatchers(globs) {
@@ -45,14 +47,28 @@ function initializeWatchers(globs) {
   });
 }
 
-function parseUris([firstResult]) {
-  if (firstResult.length === 0) { return hide(); }
+function parseResults(results) {
+  console.log(">>>>> parseResults <<<<<");
+  if (results.length === 0) { return; }
 
-  const firstUri = firstResult[0];
+  results.forEach(parseResult);
+}
+
+function parseResult(result) {
+  console.log(">>>>> parseResult <<<<<")
+  console.log(result);
+
+  const firstUri = result[0];
+  console.log(firstUri);
+
+  if (firstUri === undefined) { return; }
+  console.log(!!firstUri.fsPath.match(".resultset.json"));
+  console.log(!!firstUri.fsPath.match(/lcov.*\.info/));
+
   if (!!firstUri.fsPath.match(".resultset.json")) {
-    firstResult.forEach(parseJson);
+    result.forEach(parseJson);
   } else if (!!firstUri.fsPath.match(/lcov.*\.info/)) {
-    firstResult.forEach(parseLcov);
+    result.forEach(parseLcov);
   }
 }
 
