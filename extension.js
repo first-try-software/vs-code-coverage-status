@@ -3,6 +3,7 @@ const vscode = require("vscode");
 let statusBarItem;
 let coverageData = {};
 let timeout;
+let watchers = [];
 
 const coverageLevels = {
   perfect: { icon: "$(verified)", tooltip: "First Try!" },
@@ -17,14 +18,18 @@ function activate({ subscriptions }) {
 
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 900);
   subscriptions.push(vscode.window.onDidChangeActiveTextEditor(show));
-  subscriptions.push(vscode.workspace.onDidChangeConfiguration(initializePlugin));
+  subscriptions.push(vscode.workspace.onDidChangeConfiguration(initialize));
 
-  initializePlugin();
-  initializeWatchers();
+  initialize();
 }
 exports.activate = activate;
 
 // Private functions
+
+function initialize() {
+  initializePlugin();
+  initializeWatchers();
+}
 
 function initializePlugin() {
   console.log(">>>>> initializePlugin <<<<<");
@@ -36,14 +41,23 @@ function initializePlugin() {
 
 function initializeWatchers() {
   console.log(">>>>> initializeWatchers <<<<<");
+  watchers.forEach(watcher => watcher.dispose());
+
+  const folders = vscode.workspace.workspaceFolders;
+  if (folders === undefined) { return; }
+
   const globs = vscode.workspace.getConfiguration("coverage-status").get("searchPatterns");
-  const watchers = globs.map(glob => vscode.workspace.createFileSystemWatcher(glob, false, false, true));
+  watchers = globs.map((glob) => {
+    const relativePattern = new vscode.RelativePattern(folders[0], glob)
+    return vscode.workspace.createFileSystemWatcher(relativePattern, false, false, true);
+  });
 
   watchers.forEach((watcher) => {
     watcher.onDidCreate(debounce(initializePlugin, "create"));
     watcher.onDidChange(debounce(initializePlugin, "update"));
   });
 }
+
 function debounce(debouncedFunction, eventType) {
   return (...args) => {
     console.log(">>>>> debounced <<<<<", eventType);

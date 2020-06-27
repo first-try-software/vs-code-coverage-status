@@ -2,6 +2,10 @@
 
 All notable changes to the "coverage-status" extension will be documented in this file.
 
+## 0.1.6
+
+- Resolves issue with file watchers that prevented subsequenst test runs from updating the status bar
+
 ## 0.1.5
 
 - Debounces change handlers
