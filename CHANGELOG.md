@@ -2,6 +2,11 @@
 
 All notable changes to the "coverage-status" extension will be documented in this file.
 
+## 0.1.5
+
+- Debounces change handlers
+- Adds instrumentation
+
 ## 0.1.4
 
 - Adds support for older versions of SimpleCov

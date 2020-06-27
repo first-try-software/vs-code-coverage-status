@@ -2,6 +2,7 @@ const vscode = require("vscode");
 
 let statusBarItem;
 let coverageData = {};
+let timeout;
 
 const coverageLevels = {
   perfect: { icon: "$(verified)", tooltip: "First Try!" },
@@ -12,41 +13,48 @@ const coverageLevels = {
 }
 
 function activate({ subscriptions }) {
+  console.log("Coverage Status reporting for duty!");
+
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 900);
   subscriptions.push(vscode.window.onDidChangeActiveTextEditor(show));
-  subscriptions.push(vscode.workspace.onDidChangeConfiguration(initialize));
+  subscriptions.push(vscode.workspace.onDidChangeConfiguration(initializePlugin));
 
-  initialize();
+  initializePlugin();
+  initializeWatchers();
 }
 exports.activate = activate;
 
 // Private functions
 
-function initialize() {
+function initializePlugin() {
+  console.log(">>>>> initializePlugin <<<<<");
   coverageData = {};
-
   const globs = vscode.workspace.getConfiguration("coverage-status").get("searchPatterns");
-
-  initializePlugin(globs);
-  initializeWatchers(globs);
-}
-
-function initializePlugin(globs) {
   const promises = globs.map(glob => vscode.workspace.findFiles(glob));
-  Promise.all(promises).then(parseResults);
+  Promise.all(promises).then(parseResults).catch(err => console.log(">>>>> initializePlugin error <<<<<", err));
 }
 
-function initializeWatchers(globs) {
+function initializeWatchers() {
+  console.log(">>>>> initializeWatchers <<<<<");
+  const globs = vscode.workspace.getConfiguration("coverage-status").get("searchPatterns");
   const watchers = globs.map(glob => vscode.workspace.createFileSystemWatcher(glob, false, false, true));
 
   watchers.forEach((watcher) => {
-    watcher.onDidCreate(delay(initialize));
-    watcher.onDidChange(delay(initialize));
+    watcher.onDidCreate(debounce(initializePlugin, "create"));
+    watcher.onDidChange(debounce(initializePlugin, "update"));
   });
 }
+function debounce(debouncedFunction, eventType) {
+  return (...args) => {
+    console.log(">>>>> debounced <<<<<", eventType);
+    const later = () => {
+      timeout = null;
+      debouncedFunction(...args);
+    };
 
-function delay(handler) {
-  return (uri) => setTimeout(() => handler(uri), 500);
+    clearTimeout(timeout);
+    timeout = setTimeout(later, 500);
+  };
 }
 
 function parseResults(results) {
@@ -105,7 +113,7 @@ function parseJson(uri) {
     }
     console.log(coverageData);
     show();
-  });
+  }).catch(err => console.log(">>>>> parseJson error <<<<<", err));
 }
 
 function parseLcov(uri) {
@@ -133,7 +141,7 @@ function parseLcov(uri) {
     }
 
     show();
-  });
+  }).catch(err => console.log(">>>>> parseLcov error <<<<<", err));
 }
 
 function rootUri() {
