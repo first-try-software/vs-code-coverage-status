@@ -23,6 +23,8 @@ function activate({ subscriptions }) {
   initialize();
 }
 exports.activate = activate;
+exports.show = show;
+exports.initialize = initialize;
 
 // Private functions
 

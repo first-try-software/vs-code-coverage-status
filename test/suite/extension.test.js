@@ -1,15 +1,36 @@
-const assert = require('assert');
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
+const expect = require('expect.js')
+const sinon = require('sinon');
 const vscode = require('vscode');
-// const myExtension = require('../extension');
+const extension = require('../../extension');
 
-suite('Extension Test Suite', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+describe('Coverage Status', () => {
+  vscode.window.showInformationMessage('Start all tests.');
 
-	test('Sample test', () => {
-		assert.equal(-1, [1, 2, 3].indexOf(5));
-		assert.equal(-1, [1, 2, 3].indexOf(0));
-	});
+  describe('#activate()', () => {
+    const subject = () => { extension.activate({ subscriptions }) };
+
+    let sandbox;
+    let subscriptions;
+
+    beforeEach(() => {
+      subscriptions = [];
+      sandbox = sinon.createSandbox();
+      sandbox.spy(vscode.window, "onDidChangeActiveTextEditor");
+      sandbox.spy(vscode.workspace, "onDidChangeConfiguration");
+
+      subject();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('subscribes to onDidChangeActiveTextEditor', () => {
+      expect(vscode.window.onDidChangeActiveTextEditor.calledWith(extension.show)).to.be(true);
+    });
+
+    it('subscribes to onDidChangeConfiguration', () => {
+      expect(vscode.workspace.onDidChangeConfiguration.calledWith(extension.initialize)).to.be(true);
+    });
+  });
 });
