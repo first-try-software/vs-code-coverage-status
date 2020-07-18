@@ -2,6 +2,10 @@
 
 All notable changes to the "coverage-status" extension will be documented in this file.
 
+## 1.0.0
+
+- Adds unit and integration tests
+
 ## 0.1.6
 
 - Resolves issue with file watchers that prevented subsequenst test runs from updating the status bar
